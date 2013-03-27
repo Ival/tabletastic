@@ -67,6 +67,7 @@ module Tabletastic
     def head
       content_tag(:thead) do
         content_tag(:tr) do
+          @template.content_tag(:td, @template.check_box_tag("batch", "all")).html_safe +
           @table_fields.inject("") do |result,field|
             result + content_tag(:th, field.heading, field.heading_html)
           end.html_safe
@@ -86,6 +87,7 @@ module Tabletastic
     end
 
     def cells_for_row(record)
+      @template.content_tag(:td, @template.check_box_tag("batch", record.id)).html_safe + 
       @table_fields.inject("") do |cells, field|
         cells + content_tag(:td, field.cell_data(record), field.cell_html)
       end.html_safe
@@ -109,19 +111,25 @@ module Tabletastic
         compound_resource.flatten! if prefix.kind_of?(Array)
         case action
         when :show
-          @template.link_to(link_title(action), compound_resource)
+          @template.link_to(link_title(action), link_path(compound_resource))
         when :destroy
-          @template.link_to(link_title(action), compound_resource,
+          @template.link_to(link_title(action), link_path(compound_resource),
                             :method => :delete, :data => { :confirm => confirmation_message })
-        else # edit, other resource GET actions
-          @template.link_to(link_title(action),
-                            @template.polymorphic_path(compound_resource, :action => action))
+        else
+          @template.link_to link_title(action), link_path(compound_resource, action)
         end
       end
       self.cell(action, :heading => "", :cell_html => {:class => html_class}, &block)
     end
 
     protected
+
+    def link_path compound_resource, polymorphic = nil
+      obj =  compound_resource.pop
+      compound_resource << obj.id
+      compound_resource << polymorphic unless polymorphic.nil?
+      "/" + compound_resource.join("/")
+    end
 
     def orm_fields
       return [] if klass.blank?
