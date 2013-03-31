@@ -67,7 +67,7 @@ module Tabletastic
     def head
       content_tag(:thead) do
         content_tag(:tr) do
-          @template.content_tag(:td, @template.check_box_tag("batch", "all", false, class: "batch")).html_safe +
+          @template.content_tag(:th, @template.check_box_tag("batch", "all", false, class: "batch")).html_safe +
           @table_fields.inject("") do |result,field|
             result + content_tag(:th, field.heading, field.heading_html)
           end.html_safe
