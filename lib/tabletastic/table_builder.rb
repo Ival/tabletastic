@@ -99,14 +99,18 @@ module Tabletastic
       actions = [actions] if !actions.respond_to?(:each)
       actions = [:show, :edit, :destroy] if actions == [:all]
       actions.each do |action|
-        action_link(action.to_sym, prefix)
+        if action.class == Hash
+          action_link(action.first[0].to_sym, prefix, &action.first[1])
+        else
+          action_link(action.to_sym, prefix)
+        end
       end
     end
 
     # Dynamically builds links for the action
-    def action_link(action, prefix)
+    def action_link(action, prefix, &block)
       html_class = "actions #{action.to_s}_link"
-      block = lambda do |resource|
+      block ||= lambda do |resource|
         compound_resource = [prefix, resource].compact
         compound_resource.flatten! if prefix.kind_of?(Array)
         case action
